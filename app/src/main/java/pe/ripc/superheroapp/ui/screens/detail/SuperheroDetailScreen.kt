@@ -1,7 +1,10 @@
 package pe.ripc.superheroapp.ui.screens.detail
 
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -29,14 +32,23 @@ fun SuperheroDetailScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Details") },
+                title = { Text("Detalles", style = MaterialTheme.typography.titleLarge) },
                 navigationIcon = {
                     IconButton(onClick = onBackClick) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = "Atrás",
+                            tint = MaterialTheme.colorScheme.onSurface
+                        )
                     }
-                }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.surface,
+                    titleContentColor = MaterialTheme.colorScheme.onSurface
+                )
             )
-        }
+        },
+        containerColor = MaterialTheme.colorScheme.background
     ) { padding ->
         Box(modifier = Modifier.padding(padding).fillMaxSize()) {
             when (val state = uiState) {
@@ -65,34 +77,111 @@ fun SuperheroDetailContent(superhero: Superhero) {
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
     ) {
-        AsyncImage(
-            model = superhero.imageUrl,
-            contentDescription = superhero.name,
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(300.dp),
-            contentScale = ContentScale.Crop
-        )
-        PaddingValues(16.dp).let {
-            Column(modifier = Modifier.padding(16.dp)) {
-                Text(
-                    text = superhero.name,
-                    style = MaterialTheme.typography.headlineLarge
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-                Text(
-                    text = "Full Name: ${superhero.biography.fullName}",
-                    style = MaterialTheme.typography.bodyLarge
-                )
-                Spacer(modifier = Modifier.height(16.dp))
-                Text(text = "Powerstats:", style = MaterialTheme.typography.titleMedium)
-                Text(text = "Intelligence: ${superhero.powerstats.intelligence}")
-                Text(text = "Strength: ${superhero.powerstats.strength}")
-                Text(text = "Speed: ${superhero.powerstats.speed}")
-                Text(text = "Durability: ${superhero.powerstats.durability}")
-                Text(text = "Power: ${superhero.powerstats.power}")
-                Text(text = "Combat: ${superhero.powerstats.combat}")
-            }
+        Box {
+            AsyncImage(
+                model = superhero.imageUrl,
+                contentDescription = superhero.name,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(350.dp),
+                contentScale = ContentScale.Crop
+            )
+            // Degradado sutil opcional podría ir aquí
         }
+
+        Column(modifier = Modifier.padding(16.dp)) {
+            Text(
+                text = superhero.name,
+                style = MaterialTheme.typography.headlineLarge,
+                color = MaterialTheme.colorScheme.onBackground
+            )
+            Text(
+                text = superhero.biography.publisher,
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.secondary
+            )
+            
+            Spacer(modifier = Modifier.height(24.dp))
+
+            OutlinedCard(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(16.dp),
+                colors = CardDefaults.outlinedCardColors(
+                    containerColor = MaterialTheme.colorScheme.surfaceVariant
+                ),
+                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.3f))
+            ) {
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Text(
+                        text = "Información General",
+                        style = MaterialTheme.typography.titleMedium,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                    Spacer(modifier = Modifier.height(12.dp))
+                    DetailRow("Nombre real", superhero.biography.fullName)
+                    DetailRow("Alter egos", superhero.biography.alterEgos)
+                    DetailRow("Bando", superhero.biography.alignment.replaceFirstChar { it.uppercase() })
+                }
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            OutlinedCard(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(16.dp),
+                colors = CardDefaults.outlinedCardColors(
+                    containerColor = MaterialTheme.colorScheme.surfaceVariant
+                ),
+                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.3f))
+            ) {
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Text(
+                        text = "Estadísticas de Poder",
+                        style = MaterialTheme.typography.titleMedium,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                    Spacer(modifier = Modifier.height(12.dp))
+                    PowerStatItem("Inteligencia", superhero.powerstats.intelligence)
+                    PowerStatItem("Fuerza", superhero.powerstats.strength)
+                    PowerStatItem("Velocidad", superhero.powerstats.speed)
+                    PowerStatItem("Durabilidad", superhero.powerstats.durability)
+                    PowerStatItem("Poder", superhero.powerstats.power)
+                    PowerStatItem("Combate", superhero.powerstats.combat)
+                }
+            }
+            
+            Spacer(modifier = Modifier.height(32.dp))
+        }
+    }
+}
+
+@Composable
+fun DetailRow(label: String, value: String) {
+    Column(modifier = Modifier.padding(vertical = 4.dp)) {
+        Text(
+            text = label,
+            style = MaterialTheme.typography.labelMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+        )
+        Text(
+            text = value,
+            style = MaterialTheme.typography.bodyLarge,
+            color = MaterialTheme.colorScheme.onSurface
+        )
+    }
+}
+
+@Composable
+fun PowerStatItem(label: String, value: String) {
+    Row(
+        modifier = Modifier.fillMaxWidth().padding(vertical = 2.dp),
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        Text(text = label, style = MaterialTheme.typography.bodyMedium)
+        Text(
+            text = value,
+            style = MaterialTheme.typography.bodyLarge,
+            color = MaterialTheme.colorScheme.tertiary // GoldenEnergy
+        )
     }
 }

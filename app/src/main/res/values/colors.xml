@@ -1,10 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="purple_200">#FFBB86FC</color>
-    <color name="purple_500">#FF6200EE</color>
-    <color name="purple_700">#FF3700B3</color>
-    <color name="teal_200">#FF03DAC5</color>
-    <color name="teal_700">#FF018786</color>
+    <color name="primary">#059669</color>
+    <color name="primary_dark">#031F1D</color>
+    <color name="accent">#14B8A6</color>
+    <color name="background">#031F1D</color>
+    <color name="surface">#052E2B</color>
+    <color name="card">#073B37</color>
+    <color name="text_primary">#ECFDF5</color>
+    <color name="gold">#FCD34D</color>
+
+    <!-- M3 compatibility mappings -->
+    <color name="purple_200">#059669</color>
+    <color name="purple_500">#059669</color>
+    <color name="purple_700">#031F1D</color>
+    <color name="teal_200">#14B8A6</color>
+    <color name="teal_700">#14B8A6</color>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
 </resources>
