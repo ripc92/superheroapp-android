@@ -19,11 +19,18 @@ class SuperheroListViewModel @Inject constructor(
     private val _uiState = MutableStateFlow<SuperheroListUiState>(SuperheroListUiState.Loading)
     val uiState: StateFlow<SuperheroListUiState> = _uiState.asStateFlow()
 
+    private val _searchQuery = MutableStateFlow("")
+    val searchQuery: StateFlow<String> = _searchQuery.asStateFlow()
+
     init {
         fetchSuperheroes()
     }
 
-    fun fetchSuperheroes(query: String = "a") {
+    fun onSearchQueryChange(newQuery: String) {
+        _searchQuery.value = newQuery
+    }
+
+    fun fetchSuperheroes(query: String = _searchQuery.value.ifEmpty { "a" }) {
         viewModelScope.launch {
             _uiState.value = SuperheroListUiState.Loading
             getSuperheroesUseCase(query).onSuccess { list ->

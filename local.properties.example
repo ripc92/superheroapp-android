@@ -1,0 +1,8 @@
+## 🦸‍♂️ Superhero App - Configuración de Secretos
+# Copia este archivo como 'local.properties' y completa tus llaves.
+
+# Token de SuperHero API (Consíguelo en https://superheroapi.com/)
+superhero.api.token=TU_TOKEN_AQUI
+
+# La ruta del SDK se configura automáticamente al abrir en Android Studio
+# sdk.dir=/Users/TU_USUARIO/Library/Android/sdk

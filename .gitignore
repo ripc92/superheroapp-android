@@ -12,4 +12,7 @@
 /captures
 .externalNativeBuild
 .cxx
-local.properties
+
+# AI Agents documentation
+AGENT.md
+/.agents/

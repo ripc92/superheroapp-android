@@ -14,9 +14,6 @@ interface SuperheroDao {
         WHERE name LIKE '%' || :query || '%'
             OR fullName LIKE '%' || :query || '%'
             OR alterEgos LIKE '%' || :query || '%'
-            OR firstAppearance LIKE '%' || :query || '%'
-            OR publisher LIKE '%' || :query || '%'
-            OR alignment LIKE '%' || :query || '%'
         ORDER BY name
         """
     )

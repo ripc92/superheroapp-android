@@ -27,13 +27,32 @@ class SuperheroDetailViewModel @Inject constructor(
         fetchSuperheroDetails()
     }
 
-    private fun fetchSuperheroDetails() {
+    fun fetchSuperheroDetails() {
         viewModelScope.launch {
-            _uiState.value = SuperheroDetailUiState.Loading
-            getSuperheroByIdUseCase(superheroId).onSuccess { superhero ->
-                _uiState.value = SuperheroDetailUiState.Success(superhero)
-            }.onFailure {
-                _uiState.value = SuperheroDetailUiState.Error(it.message ?: "Unknown error")
+            // Solo mostramos Loading si no tenemos datos ya (éxito previo)
+            if (_uiState.value !is SuperheroDetailUiState.Success) {
+                _uiState.value = SuperheroDetailUiState.Loading
+            }
+            
+            getSuperheroByIdUseCase.stream(superheroId).collect { result ->
+                result.onSuccess { superhero ->
+                    _uiState.value = SuperheroDetailUiState.Success(
+                        superhero = superhero,
+                        isRefreshing = false,
+                        refreshError = null
+                    )
+                }.onFailure { error ->
+                    val currentState = _uiState.value
+                    if (currentState is SuperheroDetailUiState.Success) {
+                        // Si ya tenemos datos, solo notificamos el error de refresco para el FAB
+                        _uiState.value = currentState.copy(
+                            refreshError = error.message ?: "Error al actualizar datos"
+                        )
+                    } else {
+                        // Si no hay datos, mostramos pantalla de error completa
+                        _uiState.value = SuperheroDetailUiState.Error(error.message ?: "Error de conexión")
+                    }
+                }
             }
         }
     }
@@ -41,6 +60,10 @@ class SuperheroDetailViewModel @Inject constructor(
 
 sealed interface SuperheroDetailUiState {
     data object Loading : SuperheroDetailUiState
-    data class Success(val superhero: Superhero) : SuperheroDetailUiState
+    data class Success(
+        val superhero: Superhero,
+        val isRefreshing: Boolean = false,
+        val refreshError: String? = null
+    ) : SuperheroDetailUiState
     data class Error(val message: String) : SuperheroDetailUiState
 }

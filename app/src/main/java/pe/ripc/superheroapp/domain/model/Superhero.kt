@@ -5,7 +5,10 @@ data class Superhero(
     val name: String,
     val imageUrl: String,
     val powerstats: Powerstats,
-    val biography: Biography
+    val biography: Biography,
+    val appearance: Appearance,
+    val work: Work,
+    val connections: Connections
 )
 
 data class Powerstats(
@@ -20,7 +23,28 @@ data class Powerstats(
 data class Biography(
     val fullName: String,
     val alterEgos: String,
+    val aliases: List<String>,
+    val placeOfBirth: String,
     val firstAppearance: String,
     val publisher: String,
     val alignment: String
+)
+
+data class Appearance(
+    val gender: String,
+    val race: String,
+    val height: String,
+    val weight: String,
+    val eyeColor: String,
+    val hairColor: String
+)
+
+data class Work(
+    val occupation: String,
+    val base: String
+)
+
+data class Connections(
+    val groupAffiliation: String,
+    val relatives: List<String>
 )

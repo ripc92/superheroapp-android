@@ -1,26 +1,28 @@
 package pe.ripc.superheroapp.ui.screens.list
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.*
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.layout.ContentScale
@@ -35,6 +37,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import androidx.hilt.navigation.compose.hiltViewModel
+import kotlinx.coroutines.launch
 import pe.ripc.superheroapp.domain.model.Superhero
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
@@ -44,9 +47,20 @@ fun SuperheroListScreen(
     viewModel: SuperheroListViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    val searchQuery by viewModel.searchQuery.collectAsState()
     val keyboardController = LocalSoftwareKeyboardController.current
     val focusManager = LocalFocusManager.current
     val textFieldBounds = remember { mutableStateOf<Rect?>(null) }
+    val listState = rememberLazyListState()
+    val coroutineScope = rememberCoroutineScope()
+    val focusRequester = remember { FocusRequester() }
+
+    // Determinamos si el buscador está visible (índice 0)
+    val isSearchFieldVisible by remember {
+        derivedStateOf {
+            listState.firstVisibleItemIndex == 0
+        }
+    }
 
     fun hideKeyboard() {
         keyboardController?.hide()
@@ -77,6 +91,26 @@ fun SuperheroListScreen(
             topBar = {
                 TopAppBar(
                     title = { Text("Superheroes") },
+                    actions = {
+                        AnimatedVisibility(
+                            visible = !isSearchFieldVisible,
+                            enter = fadeIn(),
+                            exit = fadeOut()
+                        ) {
+                            IconButton(onClick = {
+                                coroutineScope.launch {
+                                    listState.animateScrollToItem(0)
+                                    focusRequester.requestFocus()
+                                }
+                            }) {
+                                Icon(
+                                    imageVector = Icons.Default.Search,
+                                    contentDescription = "Ir a buscar",
+                                    tint = MaterialTheme.colorScheme.secondary
+                                )
+                            }
+                        }
+                    },
                     colors = TopAppBarDefaults.topAppBarColors(
                         containerColor = MaterialTheme.colorScheme.surface,
                         titleContentColor = MaterialTheme.colorScheme.onSurface
@@ -97,8 +131,12 @@ fun SuperheroListScreen(
                     is SuperheroListUiState.Success -> {
                         SuperheroList(
                             superheroes = state.superheroes,
+                            searchQuery = searchQuery,
+                            onSearchQueryChange = viewModel::onSearchQueryChange,
+                            listState = listState,
+                            focusRequester = focusRequester,
                             onSuperheroClick = onSuperheroClick,
-                            onSearch = viewModel::fetchSuperheroes,
+                            onSearch = { viewModel.fetchSuperheroes() },
                             onHideKeyboard = ::hideKeyboard,
                             onTextFieldBoundsChanged = { textFieldBounds.value = it }
                         )
@@ -124,27 +162,30 @@ private fun androidx.compose.ui.input.pointer.PointerInputChange.changedToUp(): 
 @Composable
 fun SuperheroList(
     superheroes: List<Superhero>,
+    searchQuery: String,
+    onSearchQueryChange: (String) -> Unit,
+    listState: LazyListState,
+    focusRequester: FocusRequester,
     onSuperheroClick: (String) -> Unit,
-    onSearch: (String) -> Unit,
+    onSearch: () -> Unit,
     onHideKeyboard: () -> Unit,
     onTextFieldBoundsChanged: (Rect) -> Unit
 ) {
-    val search = rememberSaveable { mutableStateOf("") }
-
     fun searchSuperheroes() {
         onHideKeyboard()
-        onSearch(search.value.trim())
+        onSearch()
     }
 
     LazyColumn(
+        state = listState,
         modifier = Modifier
             .fillMaxSize()
             .padding(horizontal = 8.dp)
     ) {
         item {
             OutlinedTextField(
-                value = search.value,
-                onValueChange = { search.value = it },
+                value = searchQuery,
+                onValueChange = { onSearchQueryChange(it) },
                 label = { 
                     Text(
                         "Buscar héroe...", 
@@ -179,6 +220,7 @@ fun SuperheroList(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(vertical = 12.dp)
+                    .focusRequester(focusRequester)
                     .onGloballyPositioned { coordinates ->
                         onTextFieldBoundsChanged(coordinates.boundsInRoot())
                     }

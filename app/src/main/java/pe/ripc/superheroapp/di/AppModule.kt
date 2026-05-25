@@ -12,6 +12,7 @@ import pe.ripc.superheroapp.data.local.SuperheroDatabase
 import pe.ripc.superheroapp.data.remote.SuperheroApi
 import pe.ripc.superheroapp.data.repository.SuperheroRepositoryImpl
 import pe.ripc.superheroapp.domain.repository.SuperheroRepository
+import pe.ripc.superheroapp.BuildConfig
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import javax.inject.Singleton
@@ -19,8 +20,6 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 object AppModule {
-
-    private const val SUPERHERO_API_TOKEN = "5b3dda14cd31b7bf4da2045ce95adc90"
 
     @Provides
     @Singleton
@@ -55,6 +54,6 @@ object AppModule {
         api: SuperheroApi,
         superheroDao: SuperheroDao
     ): SuperheroRepository {
-        return SuperheroRepositoryImpl(api, superheroDao, SUPERHERO_API_TOKEN)
+        return SuperheroRepositoryImpl(api, superheroDao, BuildConfig.SUPERHERO_API_TOKEN)
     }
 }

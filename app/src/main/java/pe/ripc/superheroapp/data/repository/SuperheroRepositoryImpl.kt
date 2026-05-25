@@ -1,5 +1,7 @@
 package pe.ripc.superheroapp.data.repository
 
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
 import pe.ripc.superheroapp.data.local.SuperheroDao
 import pe.ripc.superheroapp.data.local.toEntity
 import pe.ripc.superheroapp.data.local.toSuperhero
@@ -46,6 +48,35 @@ class SuperheroRepositoryImpl(
                 Result.success(cachedSuperhero)
             } else {
                 Result.failure(e)
+            }
+        }
+    }
+
+    override fun getSuperheroStream(id: String): Flow<Result<Superhero>> = flow {
+        // 1. Intentar obtener de la base de datos primero
+        val cached = superheroDao.getSuperheroById(id)?.toSuperhero()
+        if (cached != null) {
+            emit(Result.success(cached))
+        }
+
+        // 2. Intentar refrescar desde el API
+        try {
+            val dto = api.getSuperheroDetails(token, id)
+            val superhero = dto.toSuperhero()
+            superheroDao.upsertSuperhero(superhero.toEntity())
+            emit(Result.success(superhero))
+        } catch (e: Exception) {
+            // Si falló el API pero ya emitimos caché, el ViewModel manejará el error discreto
+            // Si NO había caché y falló el API, emitimos el error para mostrar pantalla de error
+            if (cached == null) {
+                emit(Result.failure(e))
+            } else {
+                // Ya emitimos éxito con caché, lanzamos la excepción para que el colector
+                // (ViewModel) pueda detectarla si quiere mostrar el FAB de reintento.
+                // En Kotlin Flows, podemos usar catch { } o envolver el error.
+                // Vamos a emitir un tipo de error específico o simplemente re-emitir el fallo
+                // pero el ViewModel sabrá qué hacer.
+                emit(Result.failure(e))
             }
         }
     }
