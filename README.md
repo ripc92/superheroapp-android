@@ -35,7 +35,7 @@ Para ejecutar este proyecto, necesitas obtener una API Key gratuita de [superher
 3. Renómbralo o cópialo como `local.properties`.
 4. Añade tu token en la variable:
    ```properties
-   superhero.api.token=TU_TOKEN_AQUI
+   SUPERHERO_API_TOKEN=TU_TOKEN_AQUI
    ```
 5. Sincroniza el proyecto con Gradle y ejecuta la aplicación.
 
