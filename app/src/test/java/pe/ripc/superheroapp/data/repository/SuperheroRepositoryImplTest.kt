@@ -10,11 +10,8 @@ import org.junit.Test
 import pe.ripc.superheroapp.data.local.SuperheroDao
 import pe.ripc.superheroapp.data.local.SuperheroEntity
 import pe.ripc.superheroapp.data.remote.SuperheroApi
-import pe.ripc.superheroapp.data.remote.dto.BiographyDto
-import pe.ripc.superheroapp.data.remote.dto.ImageDto
-import pe.ripc.superheroapp.data.remote.dto.PowerstatsDto
-import pe.ripc.superheroapp.data.remote.dto.SearchResponseDto
-import pe.ripc.superheroapp.data.remote.dto.SuperheroDto
+import pe.ripc.superheroapp.data.remote.dto.*
+import pe.ripc.superheroapp.domain.model.*
 
 class SuperheroRepositoryImplTest {
 
@@ -103,10 +100,22 @@ class SuperheroRepositoryImplTest {
             biography = BiographyDto(
                 fullName = "$name Full",
                 alterEgos = "No alter egos found.",
+                aliases = emptyList(),
+                placeOfBirth = "Unknown",
                 firstAppearance = "Test Comics",
                 publisher = "Test Publisher",
                 alignment = "good"
             ),
+            appearance = AppearanceDto(
+                gender = "Male",
+                race = "Human",
+                height = listOf("6'0"),
+                weight = listOf("200 lb"),
+                eyeColor = "blue",
+                hairColor = "black"
+            ),
+            work = WorkDto(occupation = "Hero", base = "Earth"),
+            connections = ConnectionsDto(groupAffiliation = "None", relatives = "None"),
             image = ImageDto(url = "https://example.com/$id.png")
         )
     }
@@ -124,9 +133,21 @@ class SuperheroRepositoryImplTest {
             combat = "50",
             fullName = "$name Full",
             alterEgos = "No alter egos found.",
+            aliases = "",
+            placeOfBirth = "Unknown",
             firstAppearance = "Test Comics",
             publisher = "Test Publisher",
-            alignment = "good"
+            alignment = "good",
+            gender = "Male",
+            race = "Human",
+            height = "6'0",
+            weight = "200 lb",
+            eyeColor = "blue",
+            hairColor = "black",
+            occupation = "Hero",
+            base = "Earth",
+            groupAffiliation = "None",
+            relatives = "None"
         )
     }
 
